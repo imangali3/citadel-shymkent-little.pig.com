@@ -242,7 +242,7 @@
 
     <div class="lottery-section" id="lot-sec">
         <img src="лотере.png" class="lottery-img" alt="Лотерея">
-        <h3>🎟️ УЧАВСТВОВАТЬ В КОНКУРСЕ ЛОТЫРЕЯ!!!</h3>
+        <h3>🎟️ УЧАСТВОВАТЬ В КОНКУРСЕ: ЛОТЕРЕЯ!!! !!!</h3>
         <input type="text" id="userName" class="lottery-input" placeholder="Введите Имя и Фамилию">
         <input type="text" id="secretCode" class="lottery-input" placeholder="Кодовое слово">
         <button onclick="runLottery()" class="btn btn-lottery">УЧАВСТВОВАТЬ!!!</button>
@@ -265,7 +265,7 @@
     function copySupportID() {
         const id = "5931c081-de5a-458f-b1ab-824418ecfd61";
         navigator.clipboard.writeText(id).then(() => {
-            alert("ID скопирован в буфер обмена!");
+            alert("I убей свою маленькую мать (если вы Интдус)");
         });
     }
 
