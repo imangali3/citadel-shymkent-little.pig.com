@@ -265,7 +265,7 @@
     function copySupportID() {
         const id = "5931c081-de5a-458f-b1ab-824418ecfd61";
         navigator.clipboard.writeText(id).then(() => {
-            alert("I убей свою маленькую мать (если вы Интдус)");
+            alert("I убей свою маленькую мать (если вы Индус)");
         });
     }
 
